@@ -15,9 +15,7 @@ export async function run(): Promise<void> {
   switch (inputs.action) {
     case 'triggerPolicyScan':
       break;
-   default:
-      core.setFailed(
-        `Invalid action: ${inputs.action}. Allowed actions are: triggerPolicyScan`
-      );
+    default:
+      core.setFailed(`Invalid action: ${inputs.action}. Allowed actions are: triggerPolicyScan`);
   }
 }

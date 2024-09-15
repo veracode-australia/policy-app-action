@@ -5,6 +5,9 @@ inputs:
   action:
     description: 'Action to take'
     required: true
+  repository_full_name:
+    description: 'Repository Full Name'
+    required: false
   batch_number:
     description: 'Batch number'
     required: false
@@ -14,7 +17,7 @@ inputs:
   repository_csv_name:
     description: 'Repository CSV Name'
     required: false
-    default: 'repository.csv'
+    default: 'repositories.csv'
 runs:
   using: 'node20'
   main: 'dist/index.js'
