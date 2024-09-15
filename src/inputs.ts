@@ -5,7 +5,7 @@ type GetInput = (name: string, options?: InputOptions | undefined) => string;
 export type Inputs = {
   action: string;
   repository_full_name: string;
-  batch_number: number;
+  batch_number: string;
   github_token: string;
   repository_csv_name: string;
 };
@@ -13,7 +13,7 @@ export type Inputs = {
 export const parseInputs = (getInput: GetInput): Inputs => {
   const action = getInput('action', { required: true });
   const repository_full_name = getInput('repository_full_name', { required: false });
-  const batch_number = +getInput('batch_number', { required: false });
+  const batch_number = getInput('batch_number', { required: false });
   const github_token = getInput('github_token', { required: false });
   const repository_csv_name = getInput('repository_csv_name', { required: false });
 

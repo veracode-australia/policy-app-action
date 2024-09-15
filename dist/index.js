@@ -24939,7 +24939,7 @@ exports.parseInputs = void 0;
 const parseInputs = (getInput) => {
     const action = getInput('action', { required: true });
     const repository_full_name = getInput('repository_full_name', { required: false });
-    const batch_number = +getInput('batch_number', { required: false });
+    const batch_number = getInput('batch_number', { required: false });
     const github_token = getInput('github_token', { required: false });
     const repository_csv_name = getInput('repository_csv_name', { required: false });
     if (action == 'triggerPolicyScan') {
@@ -25072,8 +25072,10 @@ async function readCsv(csvName) {
 }
 async function triggerScanService(inputs) {
     const repository_csv_name = inputs.repository_csv_name;
+    const batch_number = inputs.batch_number;
     const repositories = await readCsv(repository_csv_name);
-    console.log('Repositories', repositories);
+    const reposToScan = repositories.filter((repo) => repo.batch_number.trim() === batch_number);
+    console.log('Repos to scan', reposToScan);
 }
 
 
