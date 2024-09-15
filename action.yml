@@ -1,0 +1,20 @@
+name: 'Veracode Policy App Action'
+description: 'Process Veracode Policy Scan'
+author: 'Vincent Deng'
+inputs:
+  action:
+    description: 'Action to take'
+    required: true
+  batch_number:
+    description: 'Batch number'
+    required: false
+  github_token:
+    description: 'your GITHUB_TOKEN for Veracode Scan Repo'
+    required: false
+  repository_csv_name:
+    description: 'Repository CSV Name'
+    required: false
+    default: 'repository.csv'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
