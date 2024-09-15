@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import { parseInputs } from './inputs';
-// import * as policyService from './services/policy-service';
+import * as triggerScanService from './services/trigger-scan-service';
 // import * as pipelineResultsService from './services/pipeline-results-service';
 // import * as policyResultsService from './services/policy-results-services';
 // import * as applicationService from './services/application-service';
@@ -14,6 +14,7 @@ export async function run(): Promise<void> {
 
   switch (inputs.action) {
     case 'triggerPolicyScan':
+      await triggerScanService.triggerScanService(inputs);
       break;
     default:
       core.setFailed(`Invalid action: ${inputs.action}. Allowed actions are: triggerPolicyScan`);
