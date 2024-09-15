@@ -2,6 +2,5 @@ node_modules
 coverage
 docs
 package-lock.json
-tests
+test
 .idea
-.

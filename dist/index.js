@@ -24952,6 +24952,12 @@ const parseInputs = (getInput) => {
         else if (!repository_csv_name) {
             throw new Error('repository_csv_name is required for triggerPolicyScan action');
         }
+        else if (!repository_full_name) {
+            throw new Error('repository_full_name is required for triggerPolicyScan action');
+        }
+        else if (repository_full_name.split('/').length !== 2) {
+            throw new Error('repository_full_name must be in the format owner/repo');
+        }
     }
     return {
         action,
