@@ -60,22 +60,47 @@ export async function retrieveLogs(inputs: InputService.Inputs): Promise<void> {
     const workflowRunsResponse = await octokit.actions.listWorkflowRunsForRepo({
       owner,
       repo,
+      per_page: 100, // Fetch up to 100 runs per page (maximum allowed)
+      page: 1,
     });
+    if (workflowRunsResponse.data.total_count === 0) {
+      core.info(`No workflow runs found for ${repo}`);
+      return;
+    }
+    type WorkflowRunsType = typeof workflowRunsResponse.data.workflow_runs[0];
+    let allWorkflowRuns: WorkflowRunsType[] = workflowRunsResponse.data.workflow_runs;
+
+    let page = 2;
+    let hasNextPage = workflowRunsResponse.data.total_count > 100; // Check if there are more pages
+
+    while (hasNextPage) {
+      const response = await octokit.actions.listWorkflowRunsForRepo({
+        owner,
+        repo,
+        per_page: 100, // Fetch up to 100 runs per page (maximum allowed)
+        page,
+      });
+
+      allWorkflowRuns = allWorkflowRuns.concat(response.data.workflow_runs);
+
+      hasNextPage = response.data.total_count > page * 100; // Check if there are more pages
+      page++;
+    }
 
     const dateFrom = new Date();
     dateFrom.setHours(dateFrom.getHours() - 10);
 
     console.log(dateFrom);
 
-    const workflowRuns = workflowRunsResponse.data.workflow_runs;
-    const attributesArray = workflowRuns.map((run) => ({
+    // const workflowRuns = workflowRunsResponse.data.workflow_runs;
+    const attributesArray = allWorkflowRuns.map((run) => ({
       created_at: run.created_at,
       name: run.name || 'Untitled Workflow' // Handle potential null/undefined run.name
     }));
     
     console.log(attributesArray);
 
-    const recentWorkflowRuns = workflowRunsResponse.data.workflow_runs.filter(
+    const recentWorkflowRuns = allWorkflowRuns.filter(
       (run) => 
         new Date(run.created_at) > dateFrom && 
         run.status === 'completed' &&

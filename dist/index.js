@@ -34022,17 +34022,36 @@ async function retrieveLogs(inputs) {
         const workflowRunsResponse = await octokit.actions.listWorkflowRunsForRepo({
             owner,
             repo,
+            per_page: 100,
+            page: 1,
         });
+        if (workflowRunsResponse.data.total_count === 0) {
+            core.info(`No workflow runs found for ${repo}`);
+            return;
+        }
+        let allWorkflowRuns = workflowRunsResponse.data.workflow_runs;
+        let page = 2;
+        let hasNextPage = workflowRunsResponse.data.total_count > 100;
+        while (hasNextPage) {
+            const response = await octokit.actions.listWorkflowRunsForRepo({
+                owner,
+                repo,
+                per_page: 100,
+                page,
+            });
+            allWorkflowRuns = allWorkflowRuns.concat(response.data.workflow_runs);
+            hasNextPage = response.data.total_count > page * 100;
+            page++;
+        }
         const dateFrom = new Date();
         dateFrom.setHours(dateFrom.getHours() - 10);
         console.log(dateFrom);
-        const workflowRuns = workflowRunsResponse.data.workflow_runs;
-        const attributesArray = workflowRuns.map((run) => ({
+        const attributesArray = allWorkflowRuns.map((run) => ({
             created_at: run.created_at,
             name: run.name || 'Untitled Workflow'
         }));
         console.log(attributesArray);
-        const recentWorkflowRuns = workflowRunsResponse.data.workflow_runs.filter((run) => new Date(run.created_at) > dateFrom &&
+        const recentWorkflowRuns = allWorkflowRuns.filter((run) => new Date(run.created_at) > dateFrom &&
             run.status === 'completed' &&
             ((run.name && run.name.includes('Tree')) ||
                 (run.name && run.name.includes('Static Code Analysis'))));

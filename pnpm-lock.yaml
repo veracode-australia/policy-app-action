@@ -17,6 +17,9 @@ importers:
       '@octokit/rest':
         specifier: ^20.1.1
         version: 20.1.1
+      '@octokit/types':
+        specifier: ^13.5.0
+        version: 13.5.0
       csv-parse:
         specifier: ^5.5.6
         version: 5.5.6
