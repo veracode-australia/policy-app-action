@@ -29194,7 +29194,7 @@ async function triggerService(inputs) {
     const repository_csv_name = inputs.repository_csv_name;
     const batch_number = inputs.batch_number;
     const repositories = await (0, read_csv_1.readCsv)(repository_csv_name);
-    let reposToScan = repositories;
+    let reposToScan = repositories.slice(1);
     if (batch_number)
         reposToScan = repositories.filter((repo) => repo.batch_number.trim() === batch_number);
     const octokit = new rest_1.Octokit({

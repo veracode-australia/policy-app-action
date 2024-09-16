@@ -9,7 +9,7 @@ export async function triggerService(inputs: InputService.Inputs): Promise<void>
   const batch_number = inputs.batch_number;
   const repositories: RepoLine[] = await readCsv(repository_csv_name);
 
-  let reposToScan = repositories;
+  let reposToScan = repositories.slice(1); // Start slicing from index 
   if (batch_number)
     reposToScan = repositories.filter((repo) => repo.batch_number.trim() === batch_number);
 
