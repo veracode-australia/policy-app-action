@@ -57,7 +57,7 @@ export async function triggerScanService(inputs: InputService.Inputs): Promise<v
       await octokit.repos.createDispatchEvent({
         owner: inputs.owner,
         repo: inputs.repo,
-        event_type: 'veracode-policy-scan',
+        event_type: 'test-scan',
         client_payload: {
           repository_full_name: repo.repository_name,
           image: 'windows-latest',
