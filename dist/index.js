@@ -29140,7 +29140,7 @@ const csv_parse_1 = __nccwpck_require__(2869);
 const rest_1 = __nccwpck_require__(4677);
 const utils = __importStar(__nccwpck_require__(7150));
 async function readCsv(csvName) {
-    const headers = ['repository_name', 'batch_number', 'scan_event', 'image'];
+    const headers = ['repository_name', 'batch_number', 'scan_event', 'image', 'policy'];
     const options = {
         delimiter: ',',
         columns: headers,
@@ -29183,6 +29183,7 @@ async function triggerScanService(inputs) {
                 client_payload: {
                     repository_full_name: repo.repository_name.trim(),
                     image: repo.image.trim(),
+                    policy: repo.policy.trim(),
                 },
             });
         }

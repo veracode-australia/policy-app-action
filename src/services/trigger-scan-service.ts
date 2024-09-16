@@ -10,10 +10,11 @@ type RepoLine = {
   batch_number: string;
   scan_event: string;
   image: string;
+  policy: string;
 };
 
 async function readCsv(csvName: string): Promise<RepoLine[]> {
-  const headers = ['repository_name', 'batch_number', 'scan_event', 'image'];
+  const headers = ['repository_name', 'batch_number', 'scan_event', 'image', 'policy'];
   const options: Options = {
     delimiter: ',',
     columns: headers,
@@ -62,6 +63,7 @@ export async function triggerScanService(inputs: InputService.Inputs): Promise<v
         client_payload: {
           repository_full_name: repo.repository_name.trim(),
           image: repo.image.trim(),
+          policy: repo.policy.trim(),
         },
       });
     } catch (error) {
