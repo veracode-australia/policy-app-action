@@ -34022,7 +34022,11 @@ async function retrieveLogs(inputs) {
             owner,
             repo,
         });
-        console.log(workflowRunsResponse.data);
+        const dateFrom = new Date();
+        dateFrom.setHours(dateFrom.getHours() - 1);
+        const recentWorkflowRuns = workflowRunsResponse.data.workflow_runs.filter((run) => new Date(run.created_at) > dateFrom);
+        console.log(recentWorkflowRuns);
+        console.log(recentWorkflowRuns.length);
         const targetWorkflowRun = workflowRunsResponse.data.workflow_runs[19];
         if (!targetWorkflowRun) {
             core.setFailed(`No workflow runs found for ${repo}`);

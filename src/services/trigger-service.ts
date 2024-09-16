@@ -62,7 +62,15 @@ export async function retrieveLogs(inputs: InputService.Inputs): Promise<void> {
       repo,
     });
 
-    console.log(workflowRunsResponse.data);
+    const dateFrom = new Date();
+    dateFrom.setHours(dateFrom.getHours() - 1);
+
+    const recentWorkflowRuns = workflowRunsResponse.data.workflow_runs.filter(
+      (run) => new Date(run.created_at) > dateFrom
+    );
+
+    console.log(recentWorkflowRuns);
+    console.log(recentWorkflowRuns.length);
 
     const targetWorkflowRun = workflowRunsResponse.data.workflow_runs[19]; // Get the first run for demonstration
 
