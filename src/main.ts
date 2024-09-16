@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import { parseInputs } from './inputs';
-import { triggerService } from './services/trigger-service';
+import { triggerService, retrieveLogs } from './services/trigger-service';
 
 /**
  * Runs the action.
@@ -8,16 +8,17 @@ import { triggerService } from './services/trigger-service';
 export async function run(): Promise<void> {
   const inputs = parseInputs(core.getInput);
 
-  await triggerService(inputs);
-
-  // switch (inputs.action) {
-  //   case 'triggerPolicyScan':
-  //     await triggerService(inputs);
-  //     break;
-  //   case 'triggerGenerateTree':
-  //       await triggerService(inputs);
-  //       break;
-  //   default:
-  //     core.setFailed(`Invalid action: ${inputs.action}. Allowed actions are: triggerPolicyScan`);
-  // }
+  switch (inputs.action) {
+    case 'triggerPolicyScan':
+      await triggerService(inputs);
+      break;
+    case 'triggerGenerateTree':
+        await triggerService(inputs);
+        break;
+    case 'retrieveLogs':
+      await retrieveLogs(inputs);
+      break;
+    default:
+      core.setFailed(`Invalid action: ${inputs.action}. Allowed actions are: triggerPolicyScan`);
+  }
 }

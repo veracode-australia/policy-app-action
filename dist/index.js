@@ -29096,7 +29096,19 @@ const inputs_1 = __nccwpck_require__(3800);
 const trigger_service_1 = __nccwpck_require__(384);
 async function run() {
     const inputs = (0, inputs_1.parseInputs)(core.getInput);
-    await (0, trigger_service_1.triggerService)(inputs);
+    switch (inputs.action) {
+        case 'triggerPolicyScan':
+            await (0, trigger_service_1.triggerService)(inputs);
+            break;
+        case 'triggerGenerateTree':
+            await (0, trigger_service_1.triggerService)(inputs);
+            break;
+        case 'retrieveLogs':
+            await (0, trigger_service_1.retrieveLogs)(inputs);
+            break;
+        default:
+            core.setFailed(`Invalid action: ${inputs.action}. Allowed actions are: triggerPolicyScan`);
+    }
 }
 
 
@@ -29186,10 +29198,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.triggerService = triggerService;
+exports.retrieveLogs = retrieveLogs;
 const core = __importStar(__nccwpck_require__(7613));
 const read_csv_1 = __nccwpck_require__(9704);
 const rest_1 = __nccwpck_require__(4677);
 const utils = __importStar(__nccwpck_require__(7150));
+const fs = __importStar(__nccwpck_require__(7147));
+const path = __importStar(__nccwpck_require__(1017));
 async function triggerService(inputs) {
     const repository_csv_name = inputs.repository_csv_name;
     const batch_number = inputs.batch_number;
@@ -29224,6 +29239,45 @@ async function triggerService(inputs) {
         catch (error) {
             console.error(`Error triggering scan for ${repo.repository_name}`, error);
         }
+    }
+}
+async function retrieveLogs(inputs) {
+    const octokit = new rest_1.Octokit({
+        auth: inputs.github_token,
+    });
+    const owner = inputs.owner;
+    const repo = inputs.repo;
+    try {
+        const workflowRunsResponse = await octokit.actions.listWorkflowRunsForRepo({
+            owner,
+            repo,
+        });
+        const targetWorkflowRun = workflowRunsResponse.data.workflow_runs[0];
+        if (!targetWorkflowRun) {
+            core.setFailed(`No workflow runs found for ${repo}`);
+            return;
+        }
+        core.info(`Retrieving logs for workflow run ${targetWorkflowRun.id} in ${repo}`);
+        const logsResponse = await octokit.actions.downloadWorkflowRunLogs({
+            owner,
+            repo,
+            run_id: targetWorkflowRun.id,
+        });
+        const logsData = typeof logsResponse.data === 'string'
+            ? logsResponse.data
+            : ArrayBuffer.isView(logsResponse.data)
+                ? new TextDecoder('utf-8').decode(logsResponse.data)
+                : '';
+        const logsFolderPath = path.join(__dirname, 'workflow-logs');
+        const logFilePath = path.join(logsFolderPath, 'workflow_run_logs.txt');
+        if (!fs.existsSync(logsFolderPath)) {
+            fs.mkdirSync(logsFolderPath);
+        }
+        fs.writeFileSync(logFilePath, logsData);
+        console.log(`Logs written to ${logFilePath}`);
+    }
+    catch (error) {
+        console.error(`Error retrieving logs for ${repo}`, error);
     }
 }
 
