@@ -63,42 +63,33 @@ export async function retrieveLogs(inputs: InputService.Inputs): Promise<void> {
     });
 
     const dateFrom = new Date();
-    dateFrom.setHours(dateFrom.getHours() - 1);
+    dateFrom.setHours(dateFrom.getHours() - 10);
 
     const recentWorkflowRuns = workflowRunsResponse.data.workflow_runs.filter(
-      (run) => new Date(run.created_at) > dateFrom
+      (run) => 
+        new Date(run.created_at) > dateFrom && 
+        run.status === 'completed' &&
+        (
+          (run.name && run.name.includes('Tree')) || 
+          (run.name && run.name.includes('Static Code Analysis'))
+        )
     );
 
-    console.log(recentWorkflowRuns);
-    console.log(recentWorkflowRuns.length);
-
-    const targetWorkflowRun = workflowRunsResponse.data.workflow_runs[19]; // Get the first run for demonstration
-
-    if (!targetWorkflowRun) {
-      core.setFailed(`No workflow runs found for ${repo}`);
-      return;
+    for (const run of recentWorkflowRuns) {
+      core.info(`Retrieving logs for workflow run ${run.id} in ${repo}`);
+      // Get the logs for the target workflow run
+      const logsResponse = await octokit.actions.downloadWorkflowRunLogs({
+        owner,
+        repo,
+        run_id: run.id,
+      });
+      const githubWorkspace = process.env.GITHUB_WORKSPACE || '';
+      const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
+      const response = await fetch(logsResponse.url);
+      const arrayBuffer = await response.arrayBuffer(); // Get the response as a buffer
+      const filePath = path.join(logsFolderPath, `${run.name}-${run.id}.log`);
+      fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
     }
-
-    core.info(`Retrieving logs for workflow run ${targetWorkflowRun.id} in ${repo}`);
-
-    // Get the logs for the target workflow run
-    const logsResponse = await octokit.actions.downloadWorkflowRunLogs({
-      owner,
-      repo,
-      run_id: targetWorkflowRun.id,
-    });
-
-    const githubWorkspace = process.env.GITHUB_WORKSPACE || '';
-    const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
-
-    const response = await fetch(logsResponse.url);
-    const arrayBuffer = await response.arrayBuffer(); // Get the response as a buffer
-
-    const filePath = path.join(logsFolderPath, 'workflow_run_logs.zip');
-    fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
-
-    console.log('Logs zip downloaded successfully!');
-    
   } catch (error) {
     console.error(`Error retrieving logs for ${repo}`, error);
   }
