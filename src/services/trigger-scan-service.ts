@@ -58,10 +58,10 @@ export async function triggerScanService(inputs: InputService.Inputs): Promise<v
       await octokit.repos.createDispatchEvent({
         owner: inputs.owner,
         repo: inputs.repo,
-        event_type: repo.scan_event,
+        event_type: repo.scan_event.trim(),
         client_payload: {
-          repository_full_name: repo.repository_name,
-          image: repo.image,
+          repository_full_name: repo.repository_name.trim(),
+          image: repo.image.trim(),
         },
       });
     } catch (error) {
