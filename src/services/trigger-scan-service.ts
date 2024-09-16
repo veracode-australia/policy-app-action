@@ -60,6 +60,7 @@ export async function triggerScanService(inputs: InputService.Inputs): Promise<v
         event_type: 'veracode-policy-scan',
         client_payload: {
           repository_full_name: repo.repository_name,
+          image: 'windows-latest',
         },
       });
     } catch (error) {

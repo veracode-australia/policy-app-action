@@ -29092,7 +29092,6 @@ const inputs_1 = __nccwpck_require__(3800);
 const triggerScanService = __importStar(__nccwpck_require__(5769));
 async function run() {
     const inputs = (0, inputs_1.parseInputs)(core.getInput);
-    console.log(`Running action with inputs: ${JSON.stringify(inputs)}`);
     switch (inputs.action) {
         case 'triggerPolicyScan':
             await triggerScanService.triggerScanService(inputs);
@@ -29183,6 +29182,7 @@ async function triggerScanService(inputs) {
                 event_type: 'veracode-policy-scan',
                 client_payload: {
                     repository_full_name: repo.repository_name,
+                    image: 'windows-latest',
                 },
             });
         }
