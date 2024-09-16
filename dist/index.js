@@ -29203,8 +29203,6 @@ const core = __importStar(__nccwpck_require__(7613));
 const read_csv_1 = __nccwpck_require__(9704);
 const rest_1 = __nccwpck_require__(4677);
 const utils = __importStar(__nccwpck_require__(7150));
-const fs = __importStar(__nccwpck_require__(7147));
-const path = __importStar(__nccwpck_require__(1017));
 async function triggerService(inputs) {
     const repository_csv_name = inputs.repository_csv_name;
     const batch_number = inputs.batch_number;
@@ -29263,19 +29261,8 @@ async function retrieveLogs(inputs) {
             repo,
             run_id: targetWorkflowRun.id,
         });
-        const logsData = typeof logsResponse.data === 'string'
-            ? logsResponse.data
-            : ArrayBuffer.isView(logsResponse.data)
-                ? new TextDecoder('utf-8').decode(logsResponse.data)
-                : '';
-        const githubWorkspace = process.env.GITHUB_WORKSPACE || '';
-        const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
-        const logFilePath = path.join(logsFolderPath, 'workflow_run_logs.txt');
-        if (!fs.existsSync(logsFolderPath)) {
-            fs.mkdirSync(logsFolderPath);
-        }
-        fs.writeFileSync(logFilePath, logsData);
-        console.log(`Logs written to ${logFilePath}`);
+        console.log(logsResponse);
+        console.log(logsResponse.data);
     }
     catch (error) {
         console.error(`Error retrieving logs for ${repo}`, error);

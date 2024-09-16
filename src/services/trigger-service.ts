@@ -3,8 +3,8 @@ import * as InputService from '../inputs';
 import { RepoLine, readCsv } from './read-csv';
 import { Octokit } from '@octokit/rest';
 import * as utils from '../utils/utils';
-import * as fs from 'fs';
-import * as path from 'path';
+// import * as fs from 'fs';
+// import * as path from 'path';
 
 export async function triggerService(inputs: InputService.Inputs): Promise<void> {
   const repository_csv_name = inputs.repository_csv_name;
@@ -79,22 +79,25 @@ export async function retrieveLogs(inputs: InputService.Inputs): Promise<void> {
       run_id: targetWorkflowRun.id,
     });
 
-    const logsData = 
-      typeof logsResponse.data === 'string' 
-          ? logsResponse.data 
-          : ArrayBuffer.isView(logsResponse.data) // Check if it's an ArrayBufferView
-              ? new TextDecoder('utf-8').decode(logsResponse.data) 
-              : ''; // Otherwise, return an empty string
+    console.log(logsResponse);
+    console.log(logsResponse.data);
 
-    const githubWorkspace = process.env.GITHUB_WORKSPACE || '';
-    const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
-    const logFilePath = path.join(logsFolderPath, 'workflow_run_logs.txt');
-    if (!fs.existsSync(logsFolderPath)) {
-      fs.mkdirSync(logsFolderPath);
-    }
+    // const logsData = 
+    //   typeof logsResponse.data === 'string'
+    //       ? logsResponse.data 
+    //       : ArrayBuffer.isView(logsResponse.data) // Check if it's an ArrayBufferView
+    //           ? new TextDecoder('utf-8').decode(logsResponse.data) 
+    //           : ''; // Otherwise, return an empty string
+
+    // const githubWorkspace = process.env.GITHUB_WORKSPACE || '';
+    // const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
+    // const logFilePath = path.join(logsFolderPath, 'workflow_run_logs.txt');
+    // if (!fs.existsSync(logsFolderPath)) {
+    //   fs.mkdirSync(logsFolderPath);
+    // }
     
-    fs.writeFileSync(logFilePath, logsData); 
-    console.log(`Logs written to ${logFilePath}`);
+    // fs.writeFileSync(logFilePath, logsData); 
+    // console.log(`Logs written to ${logFilePath}`);
 
   } catch (error) {
     console.error(`Error retrieving logs for ${repo}`, error);
