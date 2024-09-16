@@ -3,8 +3,9 @@ import * as InputService from '../inputs';
 import { RepoLine, readCsv } from './read-csv';
 import { Octokit } from '@octokit/rest';
 import * as utils from '../utils/utils';
-// import * as fs from 'fs';
-// import * as path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
+import fetch from 'node-fetch';
 
 export async function triggerService(inputs: InputService.Inputs): Promise<void> {
   const repository_csv_name = inputs.repository_csv_name;
@@ -63,7 +64,7 @@ export async function retrieveLogs(inputs: InputService.Inputs): Promise<void> {
 
     // You'll likely need to identify the specific workflow run you want logs for 
     // For example, you could filter by workflow name, or get the latest run
-    const targetWorkflowRun = workflowRunsResponse.data.workflow_runs[10]; // Get the first run for demonstration
+    const targetWorkflowRun = workflowRunsResponse.data.workflow_runs[19]; // Get the first run for demonstration
 
     if (!targetWorkflowRun) {
       core.setFailed(`No workflow runs found for ${repo}`);
@@ -79,26 +80,17 @@ export async function retrieveLogs(inputs: InputService.Inputs): Promise<void> {
       run_id: targetWorkflowRun.id,
     });
 
-    console.log(logsResponse);
-    console.log(logsResponse.data);
+    const githubWorkspace = process.env.GITHUB_WORKSPACE || '';
+    const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
 
-    // const logsData = 
-    //   typeof logsResponse.data === 'string'
-    //       ? logsResponse.data 
-    //       : ArrayBuffer.isView(logsResponse.data) // Check if it's an ArrayBufferView
-    //           ? new TextDecoder('utf-8').decode(logsResponse.data) 
-    //           : ''; // Otherwise, return an empty string
+    const response = await fetch(logsResponse.url);
+    const buffer = await response.buffer(); // Get the response as a buffer
 
-    // const githubWorkspace = process.env.GITHUB_WORKSPACE || '';
-    // const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
-    // const logFilePath = path.join(logsFolderPath, 'workflow_run_logs.txt');
-    // if (!fs.existsSync(logsFolderPath)) {
-    //   fs.mkdirSync(logsFolderPath);
-    // }
+    const filePath = path.join(logsFolderPath, 'workflow_run_logs.zip');
+    fs.writeFileSync(filePath, buffer);
+
+    console.log('Logs zip downloaded successfully!');
     
-    // fs.writeFileSync(logFilePath, logsData); 
-    // console.log(`Logs written to ${logFilePath}`);
-
   } catch (error) {
     console.error(`Error retrieving logs for ${repo}`, error);
   }
