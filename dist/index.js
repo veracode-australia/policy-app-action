@@ -34041,8 +34041,8 @@ async function retrieveLogs(inputs) {
             const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
             const response = await (0, node_fetch_1.default)(logsResponse.url);
             const arrayBuffer = await response.arrayBuffer();
-            const runName = ((_a = run.name) === null || _a === void 0 ? void 0 : _a.replace(/\//g, '-')) || `run-${run.id}`;
-            const filePath = path.join(logsFolderPath, `${runName}.zip`);
+            const runName = ((_a = run.name) === null || _a === void 0 ? void 0 : _a.replace(/\//g, '-')) || 'run';
+            const filePath = path.join(logsFolderPath, `${runName}-${run.id}.zip`);
             fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
         }
     }

@@ -90,9 +90,9 @@ export async function retrieveLogs(inputs: InputService.Inputs): Promise<void> {
       const response = await fetch(logsResponse.url);
       const arrayBuffer = await response.arrayBuffer(); // Get the response as a buffer
 
-      const runName = run.name?.replace(/\//g, '-') || `run-${run.id}`;
+      const runName = run.name?.replace(/\//g, '-') || 'run';
       
-      const filePath = path.join(logsFolderPath, `${runName}.zip`);
+      const filePath = path.join(logsFolderPath, `${runName}-${run.id}.zip`);
       fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
     }
   } catch (error) {
