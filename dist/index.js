@@ -29252,7 +29252,7 @@ async function retrieveLogs(inputs) {
             owner,
             repo,
         });
-        const targetWorkflowRun = workflowRunsResponse.data.workflow_runs[0];
+        const targetWorkflowRun = workflowRunsResponse.data.workflow_runs[10];
         if (!targetWorkflowRun) {
             core.setFailed(`No workflow runs found for ${repo}`);
             return;

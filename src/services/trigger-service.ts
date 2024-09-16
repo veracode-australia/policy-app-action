@@ -63,7 +63,7 @@ export async function retrieveLogs(inputs: InputService.Inputs): Promise<void> {
 
     // You'll likely need to identify the specific workflow run you want logs for 
     // For example, you could filter by workflow name, or get the latest run
-    const targetWorkflowRun = workflowRunsResponse.data.workflow_runs[0]; // Get the first run for demonstration
+    const targetWorkflowRun = workflowRunsResponse.data.workflow_runs[10]; // Get the first run for demonstration
 
     if (!targetWorkflowRun) {
       core.setFailed(`No workflow runs found for ${repo}`);
