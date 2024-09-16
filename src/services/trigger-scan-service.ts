@@ -1,7 +1,8 @@
 import * as InputService from '../inputs';
 import * as fs from 'fs';
 import { parse, Options } from 'csv-parse';
-import { Octokit } from '@octokit/rest'; // Import Octokit
+import { Octokit } from '@octokit/rest';
+import * as utils from '../utils/utils';
 
 type RepoLine = {
   repository_name: string;
@@ -32,8 +33,6 @@ async function readCsv(csvName: string): Promise<RepoLine[]> {
 export async function triggerScanService(inputs: InputService.Inputs): Promise<void> {
   const repository_csv_name = inputs.repository_csv_name;
   const batch_number = inputs.batch_number;
-  // const github_token = inputs.github_token;
-  // const repository_full_name = inputs.repository_full_name;
   const repositories = await readCsv(repository_csv_name);
 
   const reposToScan = repositories.filter((repo) => repo.batch_number.trim() === batch_number);
@@ -43,7 +42,14 @@ export async function triggerScanService(inputs: InputService.Inputs): Promise<v
     auth: inputs.github_token,
   });
 
+  let count = 0;
+
   for (const repo of reposToScan) {
+    if (count > 5) {
+      await utils.sleep(5000);
+      count = 0;
+    }
+    count++;
     console.log(`Triggering scan for ${repo.repository_name}`);
     try {
       await octokit.repos.createDispatchEvent({
@@ -54,15 +60,6 @@ export async function triggerScanService(inputs: InputService.Inputs): Promise<v
           repository_full_name: repo.repository_name,
         },
       });
-      // await octokit.actions.createWorkflowDispatch({
-      //   owner: inputs.owner,
-      //   repo: inputs.repo,
-      //   workflow_id: 'scan.yml',
-      //   ref: 'main',
-      //   inputs: {
-      //     repository_name: repo.repository_name,
-      //   },
-      // });
     } catch (error) {
       console.error(`Error triggering scan for ${repo.repository_name}`, error);
     }

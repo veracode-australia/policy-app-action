@@ -29138,6 +29138,7 @@ exports.triggerScanService = triggerScanService;
 const fs = __importStar(__nccwpck_require__(7147));
 const csv_parse_1 = __nccwpck_require__(2869);
 const rest_1 = __nccwpck_require__(4677);
+const utils = __importStar(__nccwpck_require__(7150));
 async function readCsv(csvName) {
     const headers = ['repository_name', 'batch_number', 'language'];
     const options = {
@@ -29165,7 +29166,13 @@ async function triggerScanService(inputs) {
     const octokit = new rest_1.Octokit({
         auth: inputs.github_token,
     });
+    let count = 0;
     for (const repo of reposToScan) {
+        if (count > 5) {
+            await utils.sleep(5000);
+            count = 0;
+        }
+        count++;
         console.log(`Triggering scan for ${repo.repository_name}`);
         try {
             await octokit.repos.createDispatchEvent({
@@ -29181,6 +29188,20 @@ async function triggerScanService(inputs) {
             console.error(`Error triggering scan for ${repo.repository_name}`, error);
         }
     }
+}
+
+
+/***/ }),
+
+/***/ 7150:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.sleep = sleep;
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 
