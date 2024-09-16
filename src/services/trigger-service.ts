@@ -65,6 +65,8 @@ export async function retrieveLogs(inputs: InputService.Inputs): Promise<void> {
     const dateFrom = new Date();
     dateFrom.setHours(dateFrom.getHours() - 10);
 
+    console.log(dateFrom);
+
     const recentWorkflowRuns = workflowRunsResponse.data.workflow_runs.filter(
       (run) => 
         new Date(run.created_at) > dateFrom && 
@@ -86,12 +88,12 @@ export async function retrieveLogs(inputs: InputService.Inputs): Promise<void> {
       const githubWorkspace = process.env.GITHUB_WORKSPACE || '';
       const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
       const response = await fetch(logsResponse.url);
-      const arrayBuffer = await response.arrayBuffer(); // Get the response as a buffer
+      const arrayBuffer = await response.buffer(); // Get the response as a buffer
 
-      const runName = run.name?.replace('/', '-');
+      const runName = run.name?.replace(/\//g, '-') || `run-${run.id}`;
       
-      const filePath = path.join(logsFolderPath, `${runName}-${run.id}.log`);
-      fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
+      const filePath = path.join(logsFolderPath, `${runName}.log`);
+      fs.writeFileSync(filePath, arrayBuffer);
     }
   } catch (error) {
     console.error(`Error retrieving logs for ${repo}`, error);

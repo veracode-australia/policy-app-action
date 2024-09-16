@@ -34025,6 +34025,7 @@ async function retrieveLogs(inputs) {
         });
         const dateFrom = new Date();
         dateFrom.setHours(dateFrom.getHours() - 10);
+        console.log(dateFrom);
         const recentWorkflowRuns = workflowRunsResponse.data.workflow_runs.filter((run) => new Date(run.created_at) > dateFrom &&
             run.status === 'completed' &&
             ((run.name && run.name.includes('Tree')) ||
@@ -34039,10 +34040,10 @@ async function retrieveLogs(inputs) {
             const githubWorkspace = process.env.GITHUB_WORKSPACE || '';
             const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
             const response = await (0, node_fetch_1.default)(logsResponse.url);
-            const arrayBuffer = await response.arrayBuffer();
-            const runName = (_a = run.name) === null || _a === void 0 ? void 0 : _a.replace('/', '-');
-            const filePath = path.join(logsFolderPath, `${runName}-${run.id}.log`);
-            fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
+            const arrayBuffer = await response.buffer();
+            const runName = ((_a = run.name) === null || _a === void 0 ? void 0 : _a.replace(/\//g, '-')) || `run-${run.id}`;
+            const filePath = path.join(logsFolderPath, `${runName}.log`);
+            fs.writeFileSync(filePath, arrayBuffer);
         }
     }
     catch (error) {
