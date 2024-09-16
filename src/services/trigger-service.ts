@@ -67,6 +67,14 @@ export async function retrieveLogs(inputs: InputService.Inputs): Promise<void> {
 
     console.log(dateFrom);
 
+    const workflowRuns = workflowRunsResponse.data.workflow_runs;
+    const attributesArray = workflowRuns.map((run) => ({
+      created_at: run.created_at,
+      name: run.name || 'Untitled Workflow' // Handle potential null/undefined run.name
+    }));
+    
+    console.log(attributesArray);
+
     const recentWorkflowRuns = workflowRunsResponse.data.workflow_runs.filter(
       (run) => 
         new Date(run.created_at) > dateFrom && 

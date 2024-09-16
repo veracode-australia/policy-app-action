@@ -34026,6 +34026,12 @@ async function retrieveLogs(inputs) {
         const dateFrom = new Date();
         dateFrom.setHours(dateFrom.getHours() - 10);
         console.log(dateFrom);
+        const workflowRuns = workflowRunsResponse.data.workflow_runs;
+        const attributesArray = workflowRuns.map((run) => ({
+            created_at: run.created_at,
+            name: run.name || 'Untitled Workflow'
+        }));
+        console.log(attributesArray);
         const recentWorkflowRuns = workflowRunsResponse.data.workflow_runs.filter((run) => new Date(run.created_at) > dateFrom &&
             run.status === 'completed' &&
             ((run.name && run.name.includes('Tree')) ||
