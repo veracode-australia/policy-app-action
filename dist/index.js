@@ -34012,6 +34012,7 @@ async function triggerService(inputs) {
     }
 }
 async function retrieveLogs(inputs) {
+    var _a;
     const octokit = new rest_1.Octokit({
         auth: inputs.github_token,
     });
@@ -34039,7 +34040,8 @@ async function retrieveLogs(inputs) {
             const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
             const response = await (0, node_fetch_1.default)(logsResponse.url);
             const arrayBuffer = await response.arrayBuffer();
-            const filePath = path.join(logsFolderPath, `${run.name}-${run.id}.log`);
+            const runName = (_a = run.name) === null || _a === void 0 ? void 0 : _a.replace('/', '-');
+            const filePath = path.join(logsFolderPath, `${runName}-${run.id}.log`);
             fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
         }
     }

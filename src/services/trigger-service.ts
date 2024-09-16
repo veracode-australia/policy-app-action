@@ -87,7 +87,10 @@ export async function retrieveLogs(inputs: InputService.Inputs): Promise<void> {
       const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
       const response = await fetch(logsResponse.url);
       const arrayBuffer = await response.arrayBuffer(); // Get the response as a buffer
-      const filePath = path.join(logsFolderPath, `${run.name}-${run.id}.log`);
+
+      const runName = run.name?.replace('/', '-');
+      
+      const filePath = path.join(logsFolderPath, `${runName}-${run.id}.log`);
       fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
     }
   } catch (error) {
