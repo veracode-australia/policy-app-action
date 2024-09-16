@@ -29020,11 +29020,21 @@ function wrappy (fn, cb) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.parseInputs = void 0;
 const parseInputs = (getInput) => {
+    var _a;
     const action = getInput('action', { required: true });
     const repository_full_name = getInput('repository_full_name', { required: false });
-    const batch_number = getInput('batch_number', { required: false });
+    const batch_number = (_a = getInput('batch_number', { required: false })) !== null && _a !== void 0 ? _a : '';
     const github_token = getInput('github_token', { required: false });
     const repository_csv_name = getInput('repository_csv_name', { required: false });
+    if (!repository_full_name) {
+        throw new Error('repository_full_name is required for trigger action');
+    }
+    else if (repository_full_name.split('/').length !== 2) {
+        throw new Error('repository_full_name must be in the format owner/repo');
+    }
+    else if (!github_token) {
+        throw new Error('github_token is required for trigger action');
+    }
     if (action == 'triggerPolicyScan') {
         if (!batch_number) {
             throw new Error('batch_number is required for triggerPolicyScan action');
@@ -29034,12 +29044,6 @@ const parseInputs = (getInput) => {
         }
         else if (!repository_csv_name) {
             throw new Error('repository_csv_name is required for triggerPolicyScan action');
-        }
-        else if (!repository_full_name) {
-            throw new Error('repository_full_name is required for triggerPolicyScan action');
-        }
-        else if (repository_full_name.split('/').length !== 2) {
-            throw new Error('repository_full_name must be in the format owner/repo');
         }
     }
     return {
@@ -29089,22 +29093,16 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(7613));
 const inputs_1 = __nccwpck_require__(3800);
-const triggerScanService = __importStar(__nccwpck_require__(5769));
+const trigger_service_1 = __nccwpck_require__(384);
 async function run() {
     const inputs = (0, inputs_1.parseInputs)(core.getInput);
-    switch (inputs.action) {
-        case 'triggerPolicyScan':
-            await triggerScanService.triggerScanService(inputs);
-            break;
-        default:
-            core.setFailed(`Invalid action: ${inputs.action}. Allowed actions are: triggerPolicyScan`);
-    }
+    await (0, trigger_service_1.triggerService)(inputs);
 }
 
 
 /***/ }),
 
-/***/ 5769:
+/***/ 9704:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -29133,12 +29131,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.triggerScanService = triggerScanService;
-const core = __importStar(__nccwpck_require__(7613));
+exports.readCsv = readCsv;
 const fs = __importStar(__nccwpck_require__(7147));
 const csv_parse_1 = __nccwpck_require__(2869);
-const rest_1 = __nccwpck_require__(4677);
-const utils = __importStar(__nccwpck_require__(7150));
 async function readCsv(csvName) {
     const headers = ['repository_name', 'batch_number', 'scan_event', 'image', 'policy'];
     const options = {
@@ -29157,12 +29152,51 @@ async function readCsv(csvName) {
         });
     });
 }
-async function triggerScanService(inputs) {
+
+
+/***/ }),
+
+/***/ 384:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.triggerService = triggerService;
+const core = __importStar(__nccwpck_require__(7613));
+const read_csv_1 = __nccwpck_require__(9704);
+const rest_1 = __nccwpck_require__(4677);
+const utils = __importStar(__nccwpck_require__(7150));
+async function triggerService(inputs) {
     const repository_csv_name = inputs.repository_csv_name;
     const batch_number = inputs.batch_number;
-    const repositories = await readCsv(repository_csv_name);
-    const reposToScan = repositories.filter((repo) => repo.batch_number.trim() === batch_number);
-    core.info(`Repos to scan: ${JSON.stringify(reposToScan)}`);
+    const repositories = await (0, read_csv_1.readCsv)(repository_csv_name);
+    let reposToScan = repositories;
+    if (batch_number)
+        reposToScan = repositories.filter((repo) => repo.batch_number.trim() === batch_number);
     const octokit = new rest_1.Octokit({
         auth: inputs.github_token,
     });
@@ -29179,7 +29213,7 @@ async function triggerScanService(inputs) {
             await octokit.repos.createDispatchEvent({
                 owner: inputs.owner,
                 repo: inputs.repo,
-                event_type: repo.scan_event.trim(),
+                event_type: inputs.action === 'triggerPolicyScan' ? repo.scan_event.trim() : 'generate_tree',
                 client_payload: {
                     repository_full_name: repo.repository_name.trim(),
                     image: repo.image.trim(),
