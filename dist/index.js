@@ -34040,10 +34040,10 @@ async function retrieveLogs(inputs) {
             const githubWorkspace = process.env.GITHUB_WORKSPACE || '';
             const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
             const response = await (0, node_fetch_1.default)(logsResponse.url);
-            const arrayBuffer = await response.buffer();
+            const arrayBuffer = await response.arrayBuffer();
             const runName = ((_a = run.name) === null || _a === void 0 ? void 0 : _a.replace(/\//g, '-')) || `run-${run.id}`;
-            const filePath = path.join(logsFolderPath, `${runName}.log`);
-            fs.writeFileSync(filePath, arrayBuffer);
+            const filePath = path.join(logsFolderPath, `${runName}.zip`);
+            fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
         }
     }
     catch (error) {

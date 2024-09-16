@@ -88,12 +88,12 @@ export async function retrieveLogs(inputs: InputService.Inputs): Promise<void> {
       const githubWorkspace = process.env.GITHUB_WORKSPACE || '';
       const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
       const response = await fetch(logsResponse.url);
-      const arrayBuffer = await response.buffer(); // Get the response as a buffer
+      const arrayBuffer = await response.arrayBuffer(); // Get the response as a buffer
 
       const runName = run.name?.replace(/\//g, '-') || `run-${run.id}`;
       
-      const filePath = path.join(logsFolderPath, `${runName}.log`);
-      fs.writeFileSync(filePath, arrayBuffer);
+      const filePath = path.join(logsFolderPath, `${runName}.zip`);
+      fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
     }
   } catch (error) {
     console.error(`Error retrieving logs for ${repo}`, error);
