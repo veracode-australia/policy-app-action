@@ -8,11 +8,12 @@ import * as utils from '../utils/utils';
 type RepoLine = {
   repository_name: string;
   batch_number: string;
-  language: string;
+  scan_event: string;
+  image: string;
 };
 
 async function readCsv(csvName: string): Promise<RepoLine[]> {
-  const headers = ['repository_name', 'batch_number', 'language'];
+  const headers = ['repository_name', 'batch_number', 'scan_event', 'image'];
   const options: Options = {
     delimiter: ',',
     columns: headers,
@@ -57,10 +58,10 @@ export async function triggerScanService(inputs: InputService.Inputs): Promise<v
       await octokit.repos.createDispatchEvent({
         owner: inputs.owner,
         repo: inputs.repo,
-        event_type: 'test-scan',
+        event_type: repo.scan_event,
         client_payload: {
           repository_full_name: repo.repository_name,
-          image: 'windows-latest',
+          image: repo.image,
         },
       });
     } catch (error) {

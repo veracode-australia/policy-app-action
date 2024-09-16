@@ -29140,7 +29140,7 @@ const csv_parse_1 = __nccwpck_require__(2869);
 const rest_1 = __nccwpck_require__(4677);
 const utils = __importStar(__nccwpck_require__(7150));
 async function readCsv(csvName) {
-    const headers = ['repository_name', 'batch_number', 'language'];
+    const headers = ['repository_name', 'batch_number', 'scan_event', 'image'];
     const options = {
         delimiter: ',',
         columns: headers,
@@ -29179,10 +29179,10 @@ async function triggerScanService(inputs) {
             await octokit.repos.createDispatchEvent({
                 owner: inputs.owner,
                 repo: inputs.repo,
-                event_type: 'test-scan',
+                event_type: repo.scan_event,
                 client_payload: {
                     repository_full_name: repo.repository_name,
-                    image: 'windows-latest',
+                    image: repo.image,
                 },
             });
         }
