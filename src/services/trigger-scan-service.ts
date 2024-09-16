@@ -1,6 +1,7 @@
 import * as InputService from '../inputs';
 import * as fs from 'fs';
 import { parse, Options } from 'csv-parse';
+import { Octokit } from '@octokit/rest'; // Import Octokit
 
 type RepoLine = {
   repository_name: string;
@@ -36,6 +37,34 @@ export async function triggerScanService(inputs: InputService.Inputs): Promise<v
   const repositories = await readCsv(repository_csv_name);
 
   const reposToScan = repositories.filter((repo) => repo.batch_number.trim() === batch_number);
-
   console.log('Repos to scan', reposToScan);
+
+  const octokit = new Octokit({
+    auth: inputs.github_token,
+  });
+
+  for (const repo of reposToScan) {
+    console.log(`Triggering scan for ${repo.repository_name}`);
+    try {
+      await octokit.repos.createDispatchEvent({
+        owner: inputs.owner,
+        repo: inputs.repo,
+        event_type: 'veracode-policy-scan',
+        client_payload: {
+          repository_full_name: repo.repository_name,
+        },
+      });
+      // await octokit.actions.createWorkflowDispatch({
+      //   owner: inputs.owner,
+      //   repo: inputs.repo,
+      //   workflow_id: 'scan.yml',
+      //   ref: 'main',
+      //   inputs: {
+      //     repository_name: repo.repository_name,
+      //   },
+      // });
+    } catch (error) {
+      console.error(`Error triggering scan for ${repo.repository_name}`, error);
+    }
+  }
 }

@@ -5,6 +5,8 @@ type GetInput = (name: string, options?: InputOptions | undefined) => string;
 export type Inputs = {
   action: string;
   repository_full_name: string;
+  owner: string;
+  repo: string;
   batch_number: string;
   github_token: string;
   repository_csv_name: string;
@@ -37,5 +39,7 @@ export const parseInputs = (getInput: GetInput): Inputs => {
     github_token,
     repository_csv_name,
     repository_full_name,
+    owner: repository_full_name.split('/')[0],
+    repo: repository_full_name.split('/')[1],
   };
 };

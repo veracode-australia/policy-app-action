@@ -3,6 +3,8 @@ type GetInput = (name: string, options?: InputOptions | undefined) => string;
 export type Inputs = {
     action: string;
     repository_full_name: string;
+    owner: string;
+    repo: string;
     batch_number: string;
     github_token: string;
     repository_csv_name: string;
