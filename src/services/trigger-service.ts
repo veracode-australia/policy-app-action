@@ -86,7 +86,8 @@ export async function retrieveLogs(inputs: InputService.Inputs): Promise<void> {
               ? new TextDecoder('utf-8').decode(logsResponse.data) 
               : ''; // Otherwise, return an empty string
 
-    const logsFolderPath = path.join(__dirname, 'workflow-logs');
+    const githubWorkspace = process.env.GITHUB_WORKSPACE || '';
+    const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
     const logFilePath = path.join(logsFolderPath, 'workflow_run_logs.txt');
     if (!fs.existsSync(logsFolderPath)) {
       fs.mkdirSync(logsFolderPath);

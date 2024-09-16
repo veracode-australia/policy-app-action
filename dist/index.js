@@ -29268,7 +29268,8 @@ async function retrieveLogs(inputs) {
             : ArrayBuffer.isView(logsResponse.data)
                 ? new TextDecoder('utf-8').decode(logsResponse.data)
                 : '';
-        const logsFolderPath = path.join(__dirname, 'workflow-logs');
+        const githubWorkspace = process.env.GITHUB_WORKSPACE || '';
+        const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
         const logFilePath = path.join(logsFolderPath, 'workflow_run_logs.txt');
         if (!fs.existsSync(logsFolderPath)) {
             fs.mkdirSync(logsFolderPath);
