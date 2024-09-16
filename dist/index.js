@@ -34022,6 +34022,7 @@ async function retrieveLogs(inputs) {
             owner,
             repo,
         });
+        console.log(workflowRunsResponse.data);
         const targetWorkflowRun = workflowRunsResponse.data.workflow_runs[19];
         if (!targetWorkflowRun) {
             core.setFailed(`No workflow runs found for ${repo}`);
@@ -34036,9 +34037,9 @@ async function retrieveLogs(inputs) {
         const githubWorkspace = process.env.GITHUB_WORKSPACE || '';
         const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
         const response = await (0, node_fetch_1.default)(logsResponse.url);
-        const buffer = await response.buffer();
+        const arrayBuffer = await response.arrayBuffer();
         const filePath = path.join(logsFolderPath, 'workflow_run_logs.zip');
-        fs.writeFileSync(filePath, buffer);
+        fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
         console.log('Logs zip downloaded successfully!');
     }
     catch (error) {

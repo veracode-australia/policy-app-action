@@ -62,8 +62,8 @@ export async function retrieveLogs(inputs: InputService.Inputs): Promise<void> {
       repo,
     });
 
-    // You'll likely need to identify the specific workflow run you want logs for 
-    // For example, you could filter by workflow name, or get the latest run
+    console.log(workflowRunsResponse.data);
+
     const targetWorkflowRun = workflowRunsResponse.data.workflow_runs[19]; // Get the first run for demonstration
 
     if (!targetWorkflowRun) {
@@ -84,10 +84,10 @@ export async function retrieveLogs(inputs: InputService.Inputs): Promise<void> {
     const logsFolderPath = path.join(githubWorkspace, 'workflow-logs');
 
     const response = await fetch(logsResponse.url);
-    const buffer = await response.buffer(); // Get the response as a buffer
+    const arrayBuffer = await response.arrayBuffer(); // Get the response as a buffer
 
     const filePath = path.join(logsFolderPath, 'workflow_run_logs.zip');
-    fs.writeFileSync(filePath, buffer);
+    fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
 
     console.log('Logs zip downloaded successfully!');
     
