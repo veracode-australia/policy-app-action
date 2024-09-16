@@ -29163,7 +29163,7 @@ async function triggerScanService(inputs) {
     const batch_number = inputs.batch_number;
     const repositories = await readCsv(repository_csv_name);
     const reposToScan = repositories.filter((repo) => repo.batch_number.trim() === batch_number);
-    core.info(`Repos to scan: ${reposToScan}`);
+    core.info(`Repos to scan: ${JSON.stringify(reposToScan)}`);
     const octokit = new rest_1.Octokit({
         auth: inputs.github_token,
     });
