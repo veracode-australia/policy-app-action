@@ -1,3 +1,4 @@
+import * as core from '@actions/core';
 import * as InputService from '../inputs';
 import * as fs from 'fs';
 import { parse, Options } from 'csv-parse';
@@ -36,7 +37,7 @@ export async function triggerScanService(inputs: InputService.Inputs): Promise<v
   const repositories = await readCsv(repository_csv_name);
 
   const reposToScan = repositories.filter((repo) => repo.batch_number.trim() === batch_number);
-  console.log('Repos to scan', reposToScan);
+  core.info(`Repos to scan: ${reposToScan}`);
 
   const octokit = new Octokit({
     auth: inputs.github_token,
@@ -46,11 +47,12 @@ export async function triggerScanService(inputs: InputService.Inputs): Promise<v
 
   for (const repo of reposToScan) {
     if (count > 5) {
+      core.info('Sleeping for 5 seconds');
       await utils.sleep(5000);
       count = 0;
     }
     count++;
-    console.log(`Triggering scan for ${repo.repository_name}`);
+    core.info(`Triggering scan for ${repo.repository_name}`);
     try {
       await octokit.repos.createDispatchEvent({
         owner: inputs.owner,
